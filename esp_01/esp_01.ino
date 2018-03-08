@@ -82,85 +82,85 @@ bool checkDevice() {
     }
 }
 
-void loop() {
-  digitalWrite(pin2, HIGH);
-  digitalWrite(BUILTIN_LED, HIGH);
-  delay(3000);
-  digitalWrite(pin2, LOW);
-  digitalWrite(BUILTIN_LED, LOW);
-}
-
 //void loop() {
-//  int httpCode = 0;
-//  
-//  if((WiFiMulti.run() == WL_CONNECTED)) {
-//    Serial.println('.');
-//    HTTPClient http;
-//    Serial.print("[HTTP] begin...\n");
-//    String mac =  WiFi.macAddress();
-//    //check new device
-////    if (newDevice) {
-////      String addDeviceQuery = "http://jingjing.fenglinfl.com/public/index.php/install/device?mac=";
-////      
-////      
-////      Serial.println(addDeviceQuery + mac);
-////      
-////      http.begin(addDeviceQuery + mac);
-////      httpCode = http.GET();
-////
-////      if (httpCode > 0) {
-////        Serial.println("Saved device");
-////      } else {
-////          Serial.println("Error");
-////          Serial.print(httpCode);
-////      }
-////      newDevice = false;
-////    }
-//
-//    //check status
-//    String checkStatusQuery = "http://jingjing.fenglinfl.com/public/index.php/check-interval?mac=";
-//    
-//    http.begin(checkStatusQuery + mac);
-//    Serial.println(checkStatusQuery + mac);
-//
-//    httpCode = http.GET();
-//
-//    if (httpCode > 0) {
-//      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-//      //String json = http.getString();
-//      //Serial.println(payload);
-//      
-//      if (httpCode == 204) {
-//          delayInterval = 3000;
-//          Serial.write(relOFF, sizeof(relOFF));
-//          digitalWrite(pin, LOW);
-//          digitalWrite(pin2, LOW);
-//      }
-//      
-//      if (httpCode == 200) {
-//          String json = http.getString();
-//          StaticJsonBuffer<200> jsonBuffer;
-//          JsonObject& object = jsonBuffer.parseObject(json);
-//          String intervalStr = object["interval"];
-//          int interval = intervalStr.toInt();
-//          
-//          delayInterval = interval*1000;
-//          Serial.write(relON, sizeof(relON));
-//          digitalWrite(pin, HIGH);
-//          digitalWrite(pin2, HIGH);
-//          Serial.println("Active");
-//      }
-//      
-//      if (httpCode == 500) {
-//          delayInterval = 5000;
-//          Serial.write(relOFF, sizeof(relOFF));
-//          digitalWrite(pin, LOW);
-//          digitalWrite(pin2, LOW);
-//      }      
-//    } else {
-//      delayInterval = 5000;
-//      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());  
-//    }
-//  }
-//  delay(delayInterval);
+//  digitalWrite(pin2, HIGH);
+//  digitalWrite(BUILTIN_LED, HIGH);
+//  delay(3000);
+//  digitalWrite(pin2, LOW);
+//  digitalWrite(BUILTIN_LED, LOW);
 //}
+
+void loop() {
+  int httpCode = 0;
+  
+  if((WiFiMulti.run() == WL_CONNECTED)) {
+    Serial.println('.');
+    HTTPClient http;
+    Serial.print("[HTTP] begin...\n");
+    String mac =  WiFi.macAddress();
+    //check new device
+//    if (newDevice) {
+//      String addDeviceQuery = "http://jingjing.fenglinfl.com/public/index.php/install/device?mac=";
+//      
+//      
+//      Serial.println(addDeviceQuery + mac);
+//      
+//      http.begin(addDeviceQuery + mac);
+//      httpCode = http.GET();
+//
+//      if (httpCode > 0) {
+//        Serial.println("Saved device");
+//      } else {
+//          Serial.println("Error");
+//          Serial.print(httpCode);
+//      }
+//      newDevice = false;
+//    }
+
+    //check status
+    String checkStatusQuery = "http://jingjing.fenglinfl.com/public/index.php/check-interval?mac=";
+    
+    http.begin(checkStatusQuery + mac);
+    Serial.println(checkStatusQuery + mac);
+
+    httpCode = http.GET();
+
+    if (httpCode > 0) {
+      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+      //String json = http.getString();
+      //Serial.println(payload);
+      
+      if (httpCode == 204) {
+          delayInterval = 3000;
+          Serial.write(relOFF, sizeof(relOFF));
+          digitalWrite(pin, LOW);
+          digitalWrite(pin2, LOW);
+      }
+      
+      if (httpCode == 200) {
+          String json = http.getString();
+          StaticJsonBuffer<200> jsonBuffer;
+          JsonObject& object = jsonBuffer.parseObject(json);
+          String intervalStr = object["interval"];
+          int interval = intervalStr.toInt();
+          
+          delayInterval = interval*1000;
+          Serial.write(relON, sizeof(relON));
+          digitalWrite(pin, HIGH);
+          digitalWrite(pin2, HIGH);
+          Serial.println("Active");
+      }
+      
+      if (httpCode == 500) {
+          delayInterval = 5000;
+          Serial.write(relOFF, sizeof(relOFF));
+          digitalWrite(pin, LOW);
+          digitalWrite(pin2, LOW);
+      }      
+    } else {
+      delayInterval = 5000;
+      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());  
+    }
+  }
+  delay(delayInterval);
+}
