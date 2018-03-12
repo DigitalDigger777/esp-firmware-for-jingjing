@@ -15,8 +15,10 @@ bool shouldSaveConfig = false;
 //bool newDevice = true;
 int delayInterval = 3000;
 
-byte relON[]  = {0xA0, 0x01, 0x01, 0xA2};  //Hex command to send to serial for open relay
-byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay
+//byte relON[]  = {0xA0, 0x01, 0x01, 0xA2};  //Hex command to send to serial for open relay
+//byte relOFF[] = {0xA0, 0x01, 0x00, 0xA1}; //Hex command to send to serial for close relay
+
+int gpio12 = 12;
 
 void setup() {
   //init serial
@@ -32,8 +34,9 @@ void setup() {
   //WiFiManagerParameter custom_http_server("server", "http server", "jingjing.com", 40);
   //wifiManager.addParameter(&custom_http_server);
   
+  
   wifiManager.autoConnect();
-
+  pinMode(gpio12, OUTPUT);
   while(!checkDevice()) {
     delay(3000);  
   }
@@ -76,12 +79,24 @@ bool checkDevice() {
     }
 }
 
+//void loop(){
+//  if((WiFiMulti.run() == WL_CONNECTED)) {
+//    Serial.println("===loop===");
+//    digitalWrite(gpio12, HIGH);
+//    delay(3000);
+//    digitalWrite(gpio12, LOW);
+//  }
+//  delay(3000);
+//}
+
 void loop() {
   int httpCode = 0;
   
   if((WiFiMulti.run() == WL_CONNECTED)) {
+  
     Serial.println('.');
     HTTPClient http;
+    
     Serial.print("[HTTP] begin...\n");
     String mac =  WiFi.macAddress();
 
@@ -98,7 +113,8 @@ void loop() {
       
       if (httpCode == 204) {
           delayInterval = 3000;
-          Serial.write(relOFF, sizeof(relOFF));
+          //Serial.write(relOFF, sizeof(relOFF));
+          digitalWrite(gpio12, LOW);
       }
       
       if (httpCode == 200) {
@@ -109,14 +125,16 @@ void loop() {
           int interval = intervalStr.toInt();
           
           delayInterval = interval*1000;
-          Serial.write(relON, sizeof(relON));
+          //Serial.write(relON, sizeof(relON));
+          digitalWrite(gpio12, HIGH);
           Serial.println("Active");
       }
       
       if (httpCode == 500) {
           delayInterval = 5000;
-          Serial.write(relOFF, sizeof(relOFF));
-      }      
+          //Serial.write(relOFF, sizeof(relOFF));
+          digitalWrite(gpio12, LOW);
+      }
     } else {
       delayInterval = 5000;
       Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());  
