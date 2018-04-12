@@ -16,6 +16,7 @@ int delayInterval = 3000;
 
 //GPION12 => D6
 int gpio12 = 12;
+int gpioReset = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -28,6 +29,7 @@ void setup() {
 
   wifiManager.autoConnect();
   pinMode(gpio12, OUTPUT);
+  pinMode(gpioReset, INPUT_PULLUP);
 
   while(!checkDevice()) {
     delay(3000);  
@@ -73,7 +75,23 @@ bool checkDevice() {
 
 void loop() {
   int httpCode = 0;
+
+  //reset 
+  int reset_level = digitalRead(gpioReset);
   
+  Serial.print("reset_level: ");
+  Serial.println(reset_level);
+
+  WiFiManager wifiManager;
+  
+  if (reset_level == 0) {
+      
+      wifiManager.resetSettings();
+      WiFi.disconnect(true);
+      delay(2000);
+      ESP.reset();
+  }
+    
   if((WiFiMulti.run() == WL_CONNECTED)) {
   
     Serial.println('.');
@@ -99,6 +117,13 @@ void loop() {
           digitalWrite(gpio12, LOW);
       }
 
+      if (httpCode == 205) {
+          wifiManager.resetSettings();
+          WiFi.disconnect(true);
+          delay(2000);
+          ESP.reset();
+      }
+      
       //if http code 200 then enable relay
       if (httpCode == 200) {
           String json = http.getString();
