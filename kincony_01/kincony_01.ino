@@ -118,6 +118,11 @@ void loop() {
       }
 
       if (httpCode == 205) {
+          //String clearResetQuery = "http://jingjing.fenglinfl.com/public/index.php/clear-reset?mac=";
+          //http.begin(clearResetQuery + mac);
+          //Serial.println(clearResetQuery + mac);
+
+          //delay(3000);
           wifiManager.resetSettings();
           WiFi.disconnect(true);
           delay(2000);
