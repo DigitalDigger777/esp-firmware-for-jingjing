@@ -156,6 +156,8 @@ void loop() {
       Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
       
     }
+  } else {
+      wifiManager.autoConnect();  
   }
   
   delay(delayInterval);
