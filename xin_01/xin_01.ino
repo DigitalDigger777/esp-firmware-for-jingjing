@@ -6,6 +6,7 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h> 
 #include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
 
 ESP8266WiFiMulti WiFiMulti;
 
@@ -29,6 +30,7 @@ void setup() {
   wifiManager.autoConnect();
   pinMode(gpio12, OUTPUT);
 
+  
   while(!checkDevice()) {
     delay(3000);  
   }
@@ -39,7 +41,7 @@ void setup() {
  * Check device, if device not find our database, then add it. 
  * return boolean, if device find or was add, will be return true, else return false.
  */
-bool checkDevice() {
+bool checkDevice() {    
     if ((WiFiMulti.run() == WL_CONNECTED)) {
       
       HTTPClient http;
@@ -71,6 +73,40 @@ bool checkDevice() {
     }
 }
 
+void updateFirmware(String mac){
+    
+    if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+        HTTPClient http;
+        t_httpUpdate_return ret = ESPhttpUpdate.update("http://xin.jjpanda.com/public/xin_01.ino.bin");
+        String changeStatusQuery = "http://xin.jjpanda.com/public/index.php/update-firmware/change-status?mac=";
+        
+        switch (ret) {
+            case HTTP_UPDATE_FAILED:
+                  Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+                  //http://xin.jjpanda.com/public/index.php/update-firmware/change-status?mac=mac&status=0
+                  http.begin(changeStatusQuery + mac + "&status=0");
+                  http.GET();
+              break;
+      
+            case HTTP_UPDATE_NO_UPDATES:
+                  Serial.println("HTTP_UPDATE_NO_UPDATES\n");
+                  //http://xin.jjpanda.com/public/index.php/update-firmware/change-status?mac=mac&status=1
+                  http.begin(changeStatusQuery + mac + "&status=1");
+                  http.GET();
+              break;
+      
+            case HTTP_UPDATE_OK:
+                  Serial.println("HTTP_UPDATE_OK");
+                  //http://xin.jjpanda.com/public/index.php/update-firmware/change-status?mac=mac&status=2
+                  http.begin(changeStatusQuery + mac + "&status=2");
+                  http.GET();
+              break;
+        }
+    }
+      
+}
+
 void loop() {
   int httpCode = 0;
   
@@ -97,6 +133,11 @@ void loop() {
       if (httpCode == 204) {
           delayInterval = 3000;
           digitalWrite(gpio12, LOW);
+      }
+
+      //update firmware
+      if (httpCode == 206) {
+        updateFirmware(mac);
       }
 
       //if http code 200 then enable relay
