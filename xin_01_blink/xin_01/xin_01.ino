@@ -19,10 +19,10 @@ int led = 2;
 //GPION12 => D6
 int gpio12 = 12;
 
+WiFiManager wifiManager;
+
 void setup() {
   Serial.begin(9600);
-
-  WiFiManager wifiManager;
 
   //reset saved settings need for debug for production uncomment for debug
   //wifiManager.resetSettings();
@@ -109,9 +109,29 @@ void updateFirmware(String mac){
       
 }
 
+void command(){
+  String incomingByte = "";
+  
+  if (Serial.available() > 0) {
+    incomingByte = Serial.readString();
+
+    Serial.print("I received: ");
+    Serial.println(incomingByte);
+    if (incomingByte == "RESET") {
+          wifiManager.resetSettings();
+          WiFi.disconnect(true);
+          delay(2000);
+          ESP.reset();
+    }
+  }
+}
+
+
 void loop() {
   int httpCode = 0;
-  
+
+  command();
+   
   if((WiFiMulti.run() == WL_CONNECTED)) {
   
     Serial.println('.');
