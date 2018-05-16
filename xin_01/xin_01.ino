@@ -15,6 +15,7 @@ char http_server[40];
 bool shouldSaveConfig = false;
 int delayInterval = 3000;
 
+int led = 2;
 //GPION12 => D6
 int gpio12 = 12;
 
@@ -28,6 +29,7 @@ void setup() {
 
 
   wifiManager.autoConnect();
+  pinMode(led, OUTPUT);
   pinMode(gpio12, OUTPUT);
 
   
@@ -168,6 +170,8 @@ void loop() {
       
     }
   }
-  
+
+  digitalWrite(led, HIGH);
   delay(delayInterval);
+  digitalWrite(led, LOW);
 }
