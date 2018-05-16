@@ -171,7 +171,7 @@ void loop() {
     }
   }
 
-  digitalWrite(led, HIGH);
+  //digitalWrite(led, HIGH);
   delay(delayInterval);
-  digitalWrite(led, LOW);
+  //digitalWrite(led, LOW);
 }
